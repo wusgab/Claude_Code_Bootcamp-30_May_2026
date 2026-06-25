@@ -1,0 +1,4 @@
+# Test-only deps for the Notes API suite (app deps come from module-04/winner).
+pytest>=8
+httpx>=0.27
+anyio>=4

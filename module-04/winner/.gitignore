@@ -1,0 +1,8 @@
+# Runtime + environment artifacts — not deliverables
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Local database created at startup
+notes.db

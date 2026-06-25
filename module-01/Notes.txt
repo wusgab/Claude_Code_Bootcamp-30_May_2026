@@ -1,0 +1,212 @@
+Install Claude Code
+
+
+
+curl -fsSL https://claude.ai/install.sh | bash
+
+
+Setting up Claude Code...
+
+✔ Claude Code successfully installed!
+
+  Version: 2.1.185
+
+  Location: ~/.local/bin/claude
+
+
+  Next: Run claude --help to get started
+
+⚠ Setup notes:
+  ● Native installation exists but ~/.local/bin is not in your PATH. Run:
+
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+
+
+✅ Installation complete!
+
+
+https://claude.com/cai/oauth/authorize?code=true&client_id=9d1c250a-e61b-44d9-88ed-5944d1962f5e&response_type=code&redirect_uri=https%3A%2F%2Fplatform.claude.com%2Foauth%2Fcode%2Fcallback&scope=org%3Acreate_api_key+user%3Aprofile+user%3Ainference+user%3Asessions%3Aclaude_code+user%3Amcp_servers+user%3Afile_upload&code_challenge=S9TKsp5AoV6Xs30ZXFFZYjb3UVjxB6oFqN8ah4CCMLQ&code_challenge_method=S256&state=_IoHkhFL7EGjpi1W_1wLzPjoua1J6Fz1yx04bS4lXr8
+
+QR5mwgtZhcRFXqFdSq5zMVA1ZKBeHOn1LDYEk80xkvvQjpvF#_IoHkhFL7EGjpi1W_1wLzPjoua1J6Fz1yx04bS4lXr8
+
+Authentication Code
+Paste this into Claude Code:
+
+QR5mwgtZhcRFXqFdSq5zMVA1ZKBeHOn1LDYEk80xkvvQjpvF#_IoHkhFL7EGjpi1W_1wLzPjoua1J6Fz1yx04bS4lXr8
+
+
+                                              │ Tips for getting started                                                                                                                                     │
+│                  Welcome back Wus!                 │ Run /init to create a CLAUDE.md file with instructions for Claude                                                                                            │
+│                                                    │ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── │
+│                       ▐▛███▜▌                      │ What's new                                                                                                                                                   │
+│                      ▝▜█████▛▘                     │ The stream-stall hint now reads "Waiting for API response · will retry in …" instead of "No response from API · Retrying in …", and triggers after 20s of s… │
+│                        ▘▘ ▝▝                       │ Improved auto mode safety: destructive git commands (`git reset --hard`, `git checkout -- .`, `git clean -fd`, `git stash drop`) are now blocked when you d… │
+│    Sonnet 4.6 · Claude Pro · wusgab@gmail.com's    │ Added a warning when the requested model is deprecated or automatically updated to a newer model, shown on stderr in print mode (`-p`) and now also coverin… │
+│    Organization                                    │ /release-notes for more                                                                                                                                      │
+│    /…/7.Workshops/26.Claude_Code_Bootcamp/3.Bins  
+
+
+
+ Security notes:
+
+ 1. Claude can make mistakes.
+    You're responsible for Claude's actions and should always
+    review them, especially when running code.
+
+ 2. Due to prompt injection risks, only use it with code you trust
+    Learn more: https://code.claude.com/docs/en/security
+
+
+
+
+Module 01 · 20 min Setup & AI-First Mindset
+
+mkdir -p module-01
+{ python3 --version; node --version; git --version; } > module-01/environment.txt
+
+In one short paragraph (≤ 6 sentences), explain the loop:
+Plan → Implement → Test → Review → Commit.
+End with one sentence on why skipping Review is the most common failure mode.
+
+
+The loop starts with Plan: define what you're building and how you'll know it's done before writing code. Implement turns that plan into working code, ideally in small increments. Test verifies the code does what it's supposed to do, catching bugs while they're cheap to fix. Review is a separate check—by a teammate, a fresh pair of eyes, or even yourself after a break—that asks whether the code is the right solution, not just a working one. Commit locks in the change with a clear message, closing the loop and setting up the next iteration. Skipping Review is the most common failure mode because passing tests only prove the code does what you told it to, not that you told it to do the right thing—so design flaws, security gaps, and bad assumptions slip through unchecked.
+
+
+2.Module 2 -  Prompting Like a Tech Lead
+A great prompt is a spec. Write it the way a Tech Lead writes a ticket.
+
+Theory · The GCOE prompt (4 min)
+A production prompt has four parts — skip one and quality drops:
+
+Goal · Constraints · Output format · Examples
+
+Goal — one verb-led sentence: what can the user do at the end?
+Constraints — language, deps, file layout, error handling, and what must not happen.
+Output format — files, exit codes, JSON shapes if any.
+Examples — one happy path + one edge case is enough to disambiguate.
+
+A vague prompt produces plausible code that fails review. GCOE produces code you can merge.
+
+
+
+GOAL: A user can <verb> <thing> from the command line.
+
+CONSTRAINTS:
+- Language: Python 3.11, standard library only (no third-party deps).
+- Persist state to ./tasks.json.
+- Exit codes: 0 success, 1 user error, 2 internal error.
+
+OUTPUT:
+- A single runnable script + a short README with usage.
+
+EXAMPLES:
+- `task add "Buy milk"` -> prints new id, exit 0.
+- `task done 999` (missing id) -> prints error to stderr, exit 1.
+
+
+Live demo · Vague vs. GCOE (5 min)
+Step 1 — paste the vague prompt:
+
+Make a CLI to manage tasks.
+
+Step 2 — paste the GCOE prompt and re-run:
+
+GOAL: A user can add, list, complete, and delete tasks from the command line.
+CONSTRAINTS: Python 3.11, stdlib only; persist to ./tasks.json;
+  exit codes 0 success / 1 user error / 2 internal error.
+OUTPUT: one runnable script + a short usage README.
+EXAMPLES:
+ `task add "Buy milk"` -> prints id, exit 0;
+ `task done 999` -> stderr error, exit 1.
+
+Success signal: the GCOE version runs all four commands with correct exit codes; the vague one doesn't.
+
+---------------------------------------------------------
+
+GOAL: 
+	Build a single-binary CLI Task Manager so a developer can manager TODOs from the terminal.
+
+CONSTRAINTS:
+- Language: Python 3.11, standard library only (no third-party deps).
+- Persist state to ./tasks.json. A singlr JSON file 'tasks.json' in CWD
+- No background processess, No network calls
+- Exit codes: 0 success, 1 user error, 2 internal error.
+- All user-config string in English
+
+OUTPUT:
+- A single runnable script (Python) + a short README with usage.
+- A short README explaining install + the four commands
+
+EXAMPLES:
+	- 'task add "Write the spec"' -> "Addded task #1: Write the spec"
+	- 'task list' -> tabular: id, status, created_at, text
+	- 'task done 1' -> "Marked #1 as done"
+	- 'task delete 99' exit 1, "No task with id 99"
+
+
+
+3.Module-03  Project Context with CLAUDE.md
+3.1.Reference · A lean CLAUDE.md (≤ 80 lines)
+
+# CLAUDE.md
+
+## Stack
+- Python 3.11, standard library only.
+
+## Conventions
+- snake_case files; one command per module under cli/.
+- Lint: ruff. Format: black.
+
+## Commands
+- Test:  pytest -q
+- Run:   python -m taskcli
+- Lint:  ruff check .
+
+## Do-not
+- Do NOT add third-party deps without asking.
+- Do NOT swallow exceptions; surface exit codes.	
+
+3.2.Reference · A complete CLAUDE.md (all 5 sections)
+
+# CLAUDE.md — Notes API
+
+## Stack
+- Python 3.11 · FastAPI · Pydantic v2 · SQLite (stdlib sqlite3).
+- Tests: `pytest` + `httpx`. Lint: ruff. Format: black.
+
+## Conventions
+- snake_case modules; routes in app/routers/, models in app/models.py.
+- One Pydantic model per resource; never return ORM rows directly.
+- HTTP status: 201 create · 200 read/update · 204 delete · 404 · 422.
+
+## Commands
+- Test:  pytest -q
+- Run:   uvicorn app.main:app --reload
+- Lint:  ruff check . && black --check .
+
+## Do-not
+- Do NOT add deps without asking — stdlib + the four above only.
+- Do NOT swallow exceptions; raise HTTPException with a clear detail.
+- Do NOT write to the DB outside a repository function.
+
+## Glossary
+- "note": {id, title, body, created_at} — body may be empty, title may not.
+- "winner": the Best-of-N candidate chosen in Module 4.
+
+3.3.Reference · Common mistakes
+
+Writing an ABOUT.md (documentation) instead of a behavior file.
+200 lines of bloat instead of a lean 80.
+Skipping Do-not — and not committing the file (if it's not in git, it isn't real).
+
+
+3.4.Live demo · Before vs. after CLAUDE.md (5 min)
+The prompt — run it twice, unchanged (before, then after):
+
+Add an `--export csv` flag to the task CLI that writes all tasks
+to a file. Match the project's existing conventions.
+Run it on the Module 2 repo with no CLAUDE.md → off-convention output.
+Drop in a 12-line CLAUDE.md; in a fresh chat, paste the same prompt → now follows conventions.
+Trim test: delete one section, re-prompt, observe the drift.
+Success signal: with CLAUDE.md present, Claude matches your naming/layout without being told.
+
