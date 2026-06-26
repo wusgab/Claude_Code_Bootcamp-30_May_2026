@@ -1,0 +1,44 @@
+name: Claude PR Review
+
+# Opening (or updating) a PR triggers an automated @claude review comment.
+# Requires:
+#   - The Claude GitHub App installed on this repo
+#   - A repo secret ANTHROPIC_API_KEY  (or swap to claude_code_oauth_token)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # Interactive fallback: comment "@claude ..." on a PR or issue to invoke it too.
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review:
+    # Auto-run on PR events; for comments, only when they mention @claude.
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review pull request #${{ github.event.pull_request.number || github.event.issue.number }}.
+            Focus on correctness bugs, error and edge-case handling, and commit hygiene
+            (atomic commits, Conventional Commit subjects). Be concise.
+            Post your review as a single PR comment using:
+            gh pr comment ${{ github.event.pull_request.number || github.event.issue.number }} --body "<your review>"
+          claude_args: |
+            --allowed-tools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*)"
