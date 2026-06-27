@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">Dashboard</h1>
+      <button type="button" class="btn-new">+ New Note</button>
+    </header>
+
+    <!-- Body: sidebar + main -->
+    <div class="body">
+      <aside class="sidebar">
+        <nav>
+          <ul>
+            {% for item in nav_items %}
+            <li class="{{ 'active' if item.active else '' }}">{{ item.label }}</li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <!-- KPI row -->
+        <section class="kpis">
+          {% for kpi in kpis %}
+          <div class="kpi-card">
+            <div class="kpi-label">{{ kpi.label }}</div>
+            <div class="kpi-value">{{ kpi.value }}</div>
+          </div>
+          {% endfor %}
+        </section>
+
+        <!-- Recent items panel -->
+        <section class="panel">
+          <h2 class="panel-title">Recent items</h2>
+          <ul class="rows">
+            {% for row in recent_items %}
+            <li class="row">
+              <span class="row-name">{{ row.name }}</span>
+              <span class="leader"></span>
+              <span class="row-value">{{ row.value }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">{{ version }}</footer>
+  </div>
+</body>
+</html>
