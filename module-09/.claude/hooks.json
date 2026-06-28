@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "pre-commit": [
+      {
+        "name": "notes-api-smoke",
+        "skill": "notes-api-smoke",
+        "description": "Boot the Notes API and assert its 5 CRUD endpoints (201/200/200/200/204) plus GET {resource}/999 -> 404. Any FAIL exits non-zero and blocks the commit.",
+        "command": "bash module-09/.claude/hooks/notes-api-smoke.sh module-09/notes_api.py 8099",
+        "appliesWhen": {
+          "stagedPathMatches": "^module-09/notes_api\\.py$"
+        },
+        "blocking": true,
+        "installedTo": ".git/hooks/pre-commit"
+      }
+    ]
+  }
+}
